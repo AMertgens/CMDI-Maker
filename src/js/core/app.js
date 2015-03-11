@@ -200,19 +200,35 @@ var APP = (function () {
 
 				if (client.isAuthenticated()) {
 					// Client is authenticated. Display UI.
-					my.log("Dropbox Client is authenticated!", "success");
+					APP.log("Dropbox Client is authenticated!", "success");
+				
+				
+				
+					dropboxDatastoreManager = client.getDatastoreManager();
+					dropboxDatastoreManager.openDefaultDatastore(function (error, datastore) {
+						if (error) {
+							alert('Error opening default datastore: ' + error);
+						}
+						
+						my.dropboxDatastore = datastore;
+						
+					});
+				
 				}
+			
+				var new_main_menu_elements = APP.main_menu_elements();
 				
-				dropboxDatastoreManager = client.getDatastoreManager();
-				dropboxDatastoreManager.openDefaultDatastore(function (error, datastore) {
-					if (error) {
-						alert('Error opening default datastore: ' + error);
+				new_main_menu_elements.unshift(
+					{
+						title: "Connect to Dropbox",
+						id: "LINK_dropbox",
+						icon:	"in_box",
+						onclick: function(){ my.authenticate(); }
 					}
-					
-					my.dropboxDatastore = datastore;
-					
-				});
+				);
 				
+				APP.GUI.mainMenu.draw(new_main_menu_elements);				
+			
 			}, "false");
 
 		};
@@ -243,7 +259,7 @@ var APP = (function () {
 		
 		my.authenticate = function(){
 		
-			my.dropboxClient.authenticate();		
+			client.authenticate();		
 			
 		};
 		
