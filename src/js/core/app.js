@@ -162,6 +162,11 @@ var APP = (function () {
 		window.addEventListener("beforeunload", my.save, false);
 		
 		
+		if (APP.CONF.isDropboxIntegrationActive){
+			my.dropboxIntegration.init();
+		}		
+		
+		
 		//since this is a very big one, that would slow code parsing and executing, we add it async when everything else is done
 		addScript(APP.CONF.path_to_scripts + APP.CONF.languageIndex_filename, function(){
 			console.log("LanguageIndex ready!");
@@ -170,6 +175,83 @@ var APP = (function () {
 		console.log("Welcome to CMDI Maker v" + APP.CONF.version);
 		
 	};
+	
+	
+	my.dropboxIntegration = (function(){
+		
+		var client = null;
+		var dropboxDatastoreManager = null;
+		
+		var my = {};
+		
+		
+		my.init = function(){
+			
+			addScript("https://www.dropbox.com/static/api/dropbox-datastores-1.2-latest.js", function(){
+				
+				client = new Dropbox.Client({key: "s9zt43mbeu8bx0t"});
+
+				// Try to finish OAuth authorization.
+				client.authenticate({interactive: false}, function (error) {
+					if (error) {
+						alert('Authentication error: ' + error);
+					}
+				});
+
+				if (client.isAuthenticated()) {
+					// Client is authenticated. Display UI.
+					my.log("Dropbox Client is authenticated!", "success");
+				}
+				
+				dropboxDatastoreManager = client.getDatastoreManager();
+				dropboxDatastoreManager.openDefaultDatastore(function (error, datastore) {
+					if (error) {
+						alert('Error opening default datastore: ' + error);
+					}
+					
+					my.dropboxDatastore = datastore;
+					
+				});
+				
+			}, "false");
+
+		};
+		
+		
+		my.save = function(app_data, environment_data){
+		//This saves the app data and the data of the active environment
+			
+			var appTable = APP.dropboxDatastore.getTable('app');
+			
+			var dropbox_save_record = {};		
+			dropbox_save_record["app"] = JSON.stringify(app_data);		
+			
+
+			if (environment_data){
+				
+				dropbox_save_record[APP.environments.active_environment.id] = JSON.stringify(environment_data);
+				
+			}
+			
+
+			var appDataInDropbox = appTable.insert(dropbox_save_record);
+			
+			console.log("Dropbox updated!");
+			
+		};
+		
+		
+		my.authenticate = function(){
+		
+			my.dropboxClient.authenticate();		
+			
+		};
+		
+		
+		return my;
+		
+	})();
+	
 	
 
 /**

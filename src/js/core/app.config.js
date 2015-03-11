@@ -53,6 +53,8 @@ APP.CONF = {
 	form_textarea_rows: 6,
 	form_textarea_columns: 18,
 	
+	isDropboxIntegrationActive: true,
+	
 	log_message_period: 5000,  //ms
 	log_section_id: "alertify-logs",
 	
