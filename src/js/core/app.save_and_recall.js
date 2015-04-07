@@ -29,10 +29,33 @@ APP.save_and_recall = (function () {
 	my.interval_time = 60;
 
 	my.getRecallDataForApp = function(){
+		
+		//First, check if a dropbox record is available
+		if (APP.dropboxDatastore){
+			log("Dropbox datastore is active, looking for data");
+			
+			var core_table = APP.dropboxDatastore.getTable("CORE_DATA");
+			
+			//since there should be only one record in the table, get the first one
+			//if no condition set is provided, query will return all records in the table
+			var all_records = core_table.query();
+			
+			if (all_records.length > 0){
+				var record = all_records[0];
+				var core_data = record.get("core");
+				log("core_data: ");
+				log(core_data);
+				var form_object = JSON.parse(core_data);
+				log("Got data from dropbox!");
+				return form_object;
+			}
+		
+		}
 
 		var form = localStorage.getItem(APP.CONF.local_storage_key);
 
 		if (!form){
+			
 			console.log("No recall data found");
 			my.setAutosaveInterval(my.interval_time);
 			APP.view("default");
@@ -61,6 +84,30 @@ APP.save_and_recall = (function () {
 			console.warn("getRecallDataForEnvironment: environment is undefined!");
 			return;
 		}
+		
+		
+		//First, check if a dropbox record is available
+		if (APP.dropboxDatastore){
+			log("Dropbox datastore is active, looking for environment data");
+		/*	
+			var core_table = APP.dropboxDatastore.getTable(environment.id);
+			
+			//since there should be only one record in the table, get the first one
+			//if no condition set is provided, query will return all records in the table
+			var all_records = core_table.query();
+			
+			if (all_records.length > 0){
+				var record = all_records[0];
+				var core_data = record.get("core");
+				log("core_data: ");
+				log(core_data);
+				var form_object = JSON.parse(core_data);
+				log("Got data from dropbox!");
+				return form_object;
+			}
+		*/
+		}
+		
 
 		var form = localStorage.getItem(environment.id);
 
@@ -193,11 +240,59 @@ APP.save_and_recall = (function () {
 	//This saves the app data and the data of the active environment
 		
 		var app_data = my.retrieveAppDataToSave();
-		localStorage.setItem(APP.CONF.local_storage_key, JSON.stringify(app_data));
+		var stringified_app_data = JSON.stringify(app_data);
+		
+		localStorage.setItem(APP.CONF.local_storage_key, stringified_app_data);
+		
+		log(stringified_app_data);
+		
+		if (APP.dropboxDatastore){
+		
+			log("Saving app core state to Dropbox!");
+			var core_table = APP.dropboxDatastore.getTable("CORE_DATA");
+			
+			//first, delete all previously created records in this table
+			//if no condition set is provided, query will return all records in the table
+			var all_records = core_table.query();
+			
+			forEach(all_records, function(record){
+				record.deleteRecord();
+			});
+			
+			var record = core_table.insert({
+				core: stringified_app_data
+			});
+			
+		}
+		
 		
 		if (APP.environments.active_environment){
+			
 			var environment_object = my.retrieveEnvironmentDataToSave();
-			localStorage.setItem(APP.environments.active_environment.id, JSON.stringify(environment_object));
+			var stringified_environment_object = JSON.stringify(environment_object);
+			
+			localStorage.setItem(APP.environments.active_environment.id, stringified_environment_object);
+			
+			if (APP.dropboxDatastore){
+				log("Saving environment state to Dropbox!");
+				var environment_table = APP.dropboxDatastore.getTable(APP.environments.active_environment.id);
+				
+				
+				//first, delete all previously created records in this table
+				//if no condition set is provided, query will return all records in the table
+				var all_records = environment_table.query();
+			
+				forEach(all_records, function(record){
+					record.deleteRecord();
+				});
+				
+				var object_to_store = {};
+				object_to_store[APP.environments.active_environment.id] = stringified_environment_object;
+				
+				environment_table.insert(object_to_store);
+			
+			}
+			
 		}
 		
 		console.log("Form saved");

@@ -107,6 +107,10 @@ var APP = (function () {
 		
 		my.active_language = my.getActiveLanguageByNavigatorLanguageOrTakeDefault();
 		
+		if (APP.CONF.isDropboxIntegrationActive){
+			my.dropboxIntegration.init();
+		}
+		
 		if (!no_recall){
 			recall_object = my.save_and_recall.getRecallDataForApp();
 			
@@ -162,11 +166,6 @@ var APP = (function () {
 		window.addEventListener("beforeunload", my.save, false);
 		
 		
-		if (APP.CONF.isDropboxIntegrationActive){
-			my.dropboxIntegration.init();
-		}		
-		
-		
 		//since this is a very big one, that would slow code parsing and executing, we add it async when everything else is done
 		addScript(APP.CONF.path_to_scripts + APP.CONF.languageIndex_filename, function(){
 			console.log("LanguageIndex ready!");
@@ -175,6 +174,9 @@ var APP = (function () {
 		console.log("Welcome to CMDI Maker v" + APP.CONF.version);
 		
 	};
+	
+	
+	my.dropboxDatastore = undefined;
 	
 	
 	my.dropboxIntegration = (function(){
@@ -208,9 +210,20 @@ var APP = (function () {
 					dropboxDatastoreManager.openDefaultDatastore(function (error, datastore) {
 						if (error) {
 							alert('Error opening default datastore: ' + error);
+							return;
 						}
 						
-						my.dropboxDatastore = datastore;
+						APP.dropboxDatastore = datastore;
+						log("Dropbox Datastore is available: ");
+						log(APP.dropboxDatastore);
+						
+						//It's dirty to call this method again at this point
+						var recall_object = APP.save_and_recall.getRecallDataForApp();
+						log("GOT OBJECT FROM DROPBOX:");
+						log(recall_object);
+						
+						APP.recall(recall_object);
+						APP.log("App data retrieved from Dropbox", "success");
 						
 					});
 				
