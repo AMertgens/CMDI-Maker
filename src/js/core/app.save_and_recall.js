@@ -261,6 +261,30 @@ APP.save_and_recall = (function () {
 	
 	};
 	
+	my.saveAllToFileAndUploadToGoogleDrive = function(){
+		
+		
+		var CMP_object = {};
+		
+		CMP_object[APP.CONF.app_core_storage_key] = my.retrieveAppDataToSave();
+		
+		if (APP.environments.active_environment){
+			var environment_object = my.retrieveEnvironmentDataToSave();
+			CMP_object.environments = {};
+			CMP_object.environments[APP.environments.active_environment.id] = environment_object;
+		}
+	
+		var text = JSON.stringify(CMP_object, null, "\t");
+		var mime_type = APP.CONF.file_download_header;
+		
+		var blob = new Blob([text], {type: mime_type});
+		
+		var file = new File([text], "CMDI-Maker-Project.cmp");
+
+		uploadFile(file);
+		
+	}
+	
 
 /**
  * Saves the active environment state to a file. For the user, this looks like a download.
