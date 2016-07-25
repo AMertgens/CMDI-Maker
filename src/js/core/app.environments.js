@@ -186,7 +186,30 @@ APP.environments = (function () {
 		my.active_environment = environment;	
 		
 		console.log("Creating environment: " + environment.id);
-	
+		
+		//signal environment
+		var sel = document.getElementById('link_lets_go');
+		var el = document.getElementById('signal_environment');
+		var startView = document.getElementById('VIEWLINK_start');
+		
+		
+		sel.addEventListener("click", function () {
+			if(environment.id){
+				el.innerHTML = environment.id + ", v" + environment.version;
+			}
+
+		});
+
+		startView.addEventListener("click", function () {
+			if(startView){
+				el.innerHTML = "version:" + APP.CONF.version;
+			} else {
+				alert(false);
+			}
+		});
+
+		//
+		
 		my.initSettings(environment.settings());
 		
 		if (environment.init){
