@@ -37,9 +37,33 @@ color: #4D87C7;
 
 
 #lang_links{
+
 	float: right;
 	margin: 0px;
 	clear: both;
+
+}
+
+
+#signal {
+
+    float: left;
+    line-height: 1em;
+    margin: 0px;
+    color: black;
+    text-transform: uppercase;
+    font-weight: bold;
+
+}
+
+
+#signal_environment{
+
+	float: right;
+	clear: both;
+	text-transform: uppercase;
+	font-weight: bold;
+
 }
 
 
