@@ -186,7 +186,62 @@ APP.environments = (function () {
 		my.active_environment = environment;	
 		
 		console.log("Creating environment: " + environment.id);
+		
+		//signal environment
+		var selProfile = document.getElementById('start_profile_select');
 	
+		var signalEl = document.getElementById('signal_environment');
+					
+		selProfile.addEventListener("click", function () {
+		
+			if(environment.id){
+				
+				signalEl.innerHTML = environment.id;
+			
+			} else {
+				
+				console.log('can\'t display environment signal');
+			}
+		});
+
+		var newSel = document.getElementById('link_lets_go');
+	
+		var headerSignal = document.getElementById('signal');
+
+		newSel.addEventListener("click", function (){
+			
+			if(my.active_environment){
+	
+			headerSignal.innerHTML = environment.id;
+
+			}
+	
+		});
+
+		var startView = document.getElementById('VIEWLINK_start');
+
+		var removeSignal = document.getElementById('signal');
+
+		startView.addEventListener("click", function (){
+
+			removeSignal.innerHTML = "";
+
+		});
+
+		var signalIcons = document.getElementById('module_icons');
+		
+		signalIcons.addEventListener("click", function (){
+			
+			if(my.active_environment){
+		
+			headerSignal.innerHTML = environment.id;
+		
+			}
+
+		});
+		
+		//
+		
 		my.initSettings(environment.settings());
 		
 		if (environment.init){
